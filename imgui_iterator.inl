@@ -2310,25 +2310,25 @@ CALL_FUNCTION(ColorConvertFloat4ToU32, unsigned int, in)
 PUSH_NUMBER(ret)
 END_IMGUI_FUNC
 //    IMGUI_API void          ColorConvertRGBtoHSV(float r, float g, float b, float& out_h, float& out_s, float& out_v);
-IMGUI_FUNCTION(ColorConvertRGBtoHSV)
-NUMBER_ARG(r)
-NUMBER_ARG(g)
-NUMBER_ARG(b)
-FLOAT_ARG(out_h)
-FLOAT_ARG(out_s)
-FLOAT_ARG(out_v)
-CALL_FUNCTION_NO_RET(ColorConvertRGBtoHSV, r, g, b, out_h, out_s, out_v)
-END_IMGUI_FUNC
+//IMGUI_FUNCTION(ColorConvertRGBtoHSV)
+//NUMBER_ARG(r)
+//NUMBER_ARG(g)
+//NUMBER_ARG(b)
+//FLOAT_ARG(out_h)
+//FLOAT_ARG(out_s)
+//FLOAT_ARG(out_v)
+//CALL_FUNCTION_NO_RET(ColorConvertRGBtoHSV, r, g, b, out_h, out_s, out_v)
+//END_IMGUI_FUNC
 //    IMGUI_API void          ColorConvertHSVtoRGB(float h, float s, float v, float& out_r, float& out_g, float& out_b);
-IMGUI_FUNCTION(ColorConvertHSVtoRGB)
-NUMBER_ARG(h)
-NUMBER_ARG(s)
-NUMBER_ARG(v)
-FLOAT_ARG(out_r)
-FLOAT_ARG(out_g)
-FLOAT_ARG(out_b)
-CALL_FUNCTION_NO_RET(ColorConvertHSVtoRGB, h, s, v, out_r, out_g, out_b)
-END_IMGUI_FUNC
+//IMGUI_FUNCTION(ColorConvertHSVtoRGB)
+//NUMBER_ARG(h)
+//NUMBER_ARG(s)
+//NUMBER_ARG(v)
+//FLOAT_ARG(out_r)
+//FLOAT_ARG(out_g)
+//FLOAT_ARG(out_b)
+//CALL_FUNCTION_NO_RET(ColorConvertHSVtoRGB, h, s, v, out_r, out_g, out_b)
+//END_IMGUI_FUNC
 //    IMGUI_API int           GetKeyIndex(ImGuiKey imgui_key);                                    // map ImGuiKey_* values into user's key index. == io.KeyMap[key]
 IMGUI_FUNCTION(GetKeyIndex)
 INT_ARG(imgui_key)

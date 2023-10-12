@@ -591,6 +591,7 @@ static void doREPL (lua_State *L) {
 }
 
 /* }================================================================== */
+int luaopen_imgui(lua_State* L);
 
 /*
 ** Main body of stand-alone interpreter (to be called in protected mode).
@@ -614,6 +615,7 @@ static int pmain (lua_State *L) {
     lua_setfield(L, LUA_REGISTRYINDEX, "LUA_NOENV");
   }
   luaL_openlibs(L);  /* open standard libraries */
+  luaL_requiref(L, "imgui", luaopen_imgui, 0);
   createargtable(L, argv, argc, script);  /* create table 'arg' */
   lua_gc(L, LUA_GCGEN, 0, 0);  /* GC in generational mode */
   if (!(args & has_E)) {  /* no option '-E'? */

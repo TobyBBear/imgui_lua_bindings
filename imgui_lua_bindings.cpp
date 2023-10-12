@@ -9,6 +9,65 @@ extern "C" {
   #include "lauxlib.h"
 }
 
+// Backend specific calls
+
+
+int imgui_user_wrapper_Shutdown(lua_State* L);
+int imgui_user_wrapper_NewFrame(lua_State* L);
+int imgui_user_wrapper_Render(lua_State* L);
+
+// Manual wrappers
+
+// Value getter function for fetching the n-th value in a table
+// assumes the table is on top of the stack, neglects metamethods
+// indexes are [0, len), so add 1 for lua table access
+static float PlotLinesValueGetter(void* data, int idx)
+{
+    lua_State* L = reinterpret_cast<lua_State*>(data);
+    lua_rawgeti(L, -1, idx + 1);
+    lua_Number n = lua_tonumber(L, -1);
+    lua_pop(L, 1);
+    return n;
+}
+
+// Wrapper around ImGui::PlotLines to accept a table of numbers
+// I'm probably making some bad assumptions about when functions are called
+static int imgui_manual_wrapper_PlotLines(lua_State* L)
+{
+    const char* label = luaL_checkstring(L, 1); // label
+    luaL_checktype(L, 2, LUA_TTABLE);           // values
+    const int values_offset = luaL_optinteger(L, 3, 1) - 1; // convert to 0-based so internal [0,len) indexes work
+    const char* overlay_text = luaL_optstring(L, 4, NULL);
+    const lua_Number scale_min = luaL_optnumber(L, 4, FLT_MAX);
+    const lua_Number scale_max = luaL_optnumber(L, 5, FLT_MAX);
+    const lua_Number graph_size_x = luaL_optnumber(L, 6, 0.0);
+    const lua_Number graph_size_y = luaL_optnumber(L, 7, 0.0);
+    const ImVec2 graph_size(graph_size_x, graph_size_y);
+
+    lua_pushvalue(L, 2); // copy of the data table
+    ImGui::PlotLines(label, &PlotLinesValueGetter, L,
+                     luaL_len(L, 2),
+                     values_offset,
+                     overlay_text,
+                     scale_min,
+                     scale_max,
+                     graph_size);
+    lua_pop(L, 1);
+
+    //PlotLines(const char* label,
+    //          float(*values_getter)(void* data, int idx),
+    //          void* data,
+    //          int values_count,
+    //          int values_offset = 0,
+    //          const char* overlay_text = NULL,
+    //          float scale_min = FLT_MAX,
+    //          float scale_max = FLT_MAX,
+    //          ImVec2 graph_size = ImVec2(0, 0));
+
+    return 0;
+}
+
+
 
 // THIS IS FOR LUA 5.3 although you can make a few changes for other versions
 
@@ -358,7 +417,7 @@ static void ImEndStack(int type) { \
 #define MAKE_ENUM(c_name,lua_name)
 #define END_ENUM(name)
 
-#include "imgui_iterator.h"
+#include "imgui_iterator.inl"
 
 
 static const struct luaL_Reg imguilib [] = {
@@ -481,9 +540,20 @@ static const struct luaL_Reg imguilib [] = {
 #undef END_ENUM
 #define END_ENUM(name)
 
-#include "imgui_iterator.h"
+#include "imgui_iterator.inl"
     // impl_Button is undeclared
     // {"Button", impl_Button},
+    
+    // TODO overloaded functions
+
+    // Manual Wrappers
+    { "PlotLines", imgui_manual_wrapper_PlotLines},
+    
+    // User/backend implementation wrappers
+    { "Shutdown", imgui_user_wrapper_Shutdown},
+    { "NewFrame", imgui_user_wrapper_NewFrame},
+    { "Render", imgui_user_wrapper_Render},
+    
     {NULL, NULL}
 };
 
@@ -619,7 +689,7 @@ static void PushImguiEnums(lua_State* lState, const char* tableName) {
 #undef POP_END_STACK
 #define POP_END_STACK(type)
 
-#include "imgui_iterator.h"
+#include "imgui_iterator.inl"
 
     lua_rawset(lState, -3);
 };
@@ -632,7 +702,17 @@ void LoadImguiBindings() {
     lua_newtable(lState);
     luaL_setfuncs(lState, imguilib, 0);
     PushImguiEnums(lState, "constant");
-    lua_setglobal(lState, "imgui");
+    //lua_setglobal(lState, "imgui");
+}
+
+extern "C"
+{
+    int luaopen_imgui(lua_State* L)
+    {
+       lState = L;
+       LoadImguiBindings();
+       return 1;
+    }
 }
 
 std::vector<int> drawList;
